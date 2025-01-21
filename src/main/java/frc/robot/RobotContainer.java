@@ -24,7 +24,8 @@ public class RobotContainer {
   private void configureBindings() {
     drive.setDefaultCommand(
         new RunCommand(
-            () -> drive.setDriveMotors(controller.getLeftY() * -1, controller.getRightX() * -1), drive));
+            () -> drive.setDriveMotors(controller.getLeftY(), controller.getRightX() * -1),
+            drive));
   }
 
   public Command getAutonomousCommand() {
