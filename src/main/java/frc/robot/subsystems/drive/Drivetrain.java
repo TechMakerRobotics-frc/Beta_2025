@@ -30,13 +30,13 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain() {
     motorRightFront.configFactoryDefault();
     motorRightFollower.configFactoryDefault();
-    
+
     motorLeftFront.configFactoryDefault();
     motorRightFollower.configFactoryDefault();
 
     motorLeftFollower.setNeutralMode(NeutralMode.Brake);
     motorLeftFront.setNeutralMode(NeutralMode.Brake);
-    
+
     motorRightFollower.setNeutralMode(NeutralMode.Brake);
     motorRightFront.setNeutralMode(NeutralMode.Brake);
 
@@ -58,8 +58,7 @@ public class Drivetrain extends SubsystemBase {
     return instance;
   }
 
-  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
-  }
+  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {}
 
   public void drive(double xSpeed, double rot) {
     var wheelSpeeds = kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, rot));
