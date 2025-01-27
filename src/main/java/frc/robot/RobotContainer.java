@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Auto.AutoSimple;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 // import frc.robot.subsystems.arm.Arm;
 // import frc.robot.subsystems.arm.ArmIOSpark;
 import frc.robot.subsystems.cradle.Cradle;
@@ -18,6 +20,7 @@ import frc.robot.subsystems.drive.Drivetrain;
 public class RobotContainer {
   private final Drivetrain drive = Drivetrain.getInstance();
   private final Cradle cradle = new Cradle(new CradleIOSpark());
+  private final Climber climber = new Climber(new ClimberIOSpark());
   // private final Arm arm = new Arm(new ArmIOSpark());
 
   private final CommandXboxController controller =
@@ -44,6 +47,12 @@ public class RobotContainer {
     triggerRight
         .onTrue(new InstantCommand(() -> cradle.runVelocity(-controller.getRightTriggerAxis() * 2)))
         .onFalse(new InstantCommand(() -> cradle.stop()));
+
+    controller.x().onTrue(new InstantCommand(() -> climber.runVelocity(2)))
+                  .onFalse(new InstantCommand(() -> climber.stop()));
+
+    controller.y().onTrue(new InstantCommand(() -> climber.runVelocity(-2)))
+                  .onFalse(new InstantCommand(() -> climber.stop()));
   }
 
   public Command getAutonomousCommand() {
