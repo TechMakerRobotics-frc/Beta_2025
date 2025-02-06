@@ -16,12 +16,16 @@ import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.cradle.Cradle;
 import frc.robot.subsystems.cradle.CradleIOSpark;
 import frc.robot.subsystems.drive.Drivetrain;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIOSpark;
 
 public class RobotContainer {
   private final Drivetrain drive = Drivetrain.getInstance();
-  private final Cradle cradle = new Cradle(new CradleIOSpark());
-  private final Climber climber = new Climber(new ClimberIOSpark());
+  //private final Cradle cradle = new Cradle(new CradleIOSpark());
+  //private final Climber climber = new Climber(new ClimberIOSpark());
   // private final Arm arm = new Arm(new ArmIOSpark());
+
+  private final Elevator elevator = new Elevator(new ElevatorIOSpark());
 
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -40,7 +44,7 @@ public class RobotContainer {
         new RunCommand(
             () -> drive.setDriveMotors(controller.getLeftY(), controller.getRightX() * -1), drive));
 
-    triggerLeft
+    /*triggerLeft
         .onTrue(new InstantCommand(() -> cradle.runVelocity(controller.getLeftTriggerAxis() * 2)))
         .onFalse(new InstantCommand(() -> cradle.stop()));
 
@@ -56,8 +60,14 @@ public class RobotContainer {
     controller
         .y()
         .onTrue(new InstantCommand(() -> climber.runVelocity(-2)))
-        .onFalse(new InstantCommand(() -> climber.stop()));
-  }
+        .onFalse(new InstantCommand(() -> climber.stop()));*/
+
+        controller.rightBumper().onTrue(new InstantCommand(() -> elevator.set(0.5),elevator))
+        .onFalse(new InstantCommand(() -> elevator.stop(),elevator));
+        
+        controller.leftBumper().onTrue(new InstantCommand(() -> elevator.set(-0.5),elevator))
+        .onFalse(new InstantCommand(() -> elevator.stop(),elevator));
+      }
 
   public Command getAutonomousCommand() {
     return new AutoSimple();

@@ -1,6 +1,5 @@
 package frc.robot.interfaces.motor;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
@@ -11,6 +10,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -20,7 +20,7 @@ public class MotorIOSparkMax implements MotorIO {
 
   private final SparkMax motor;
   private final RelativeEncoder encoder;
-  private final AbsoluteEncoder absEncoder;
+  private RelativeEncoder alternateEncoder;
   private SparkMaxConfig motorConfig = new SparkMaxConfig();
   private SparkClosedLoopController closedLoopController;
 
@@ -37,7 +37,6 @@ public class MotorIOSparkMax implements MotorIO {
     motor.setCANTimeout(timeout);
 
     encoder = motor.getEncoder();
-    absEncoder = motor.getAbsoluteEncoder();
 
     motorConfig
         .inverted(inverted)
@@ -62,7 +61,6 @@ public class MotorIOSparkMax implements MotorIO {
         .reverseSoftLimitEnabled(false);
     motorConfig
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
         .p(6)
@@ -70,24 +68,18 @@ public class MotorIOSparkMax implements MotorIO {
         .d(0.1)
         .outputRange(-1, 1)
         .positionWrappingEnabled(true)
-        .positionWrappingInputRange(-0.5, 0.5)
-        // Set PID values for velocity control in slot 1
-        .p(0.01, ClosedLoopSlot.kSlot1)
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+        .positionWrappingInputRange(-0.5, 0.5);
 
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motor.getClosedLoopController();
   }
-
   /**
    * @param inputs
    */
   @Override
   public void updateInputs(MotorIOInputs inputs) {
     inputs.positionRot = encoder.getPosition();
+    inputs.positionAlternateEncoder = alternateEncoder.getPosition();
     inputs.velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(encoder.getVelocity());
     inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
     inputs.currentAmps = new double[] {motor.getOutputCurrent()};
@@ -107,7 +99,7 @@ public class MotorIOSparkMax implements MotorIO {
   public void setVelocity(double velocityRadPerSec) {
     double speed = Units.radiansPerSecondToRotationsPerMinute(velocityRadPerSec);
     closedLoopController.setReference(
-        speed, ControlType.kMAXMotionVelocityControl, ClosedLoopSlot.kSlot1);
+        speed, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
   }
 
   @Override
@@ -156,12 +148,30 @@ public class MotorIOSparkMax implements MotorIO {
   }
 
   @Override
-  public double getAbsEncoderPosition() {
-    return absEncoder.getPosition();
+  public void setFollower(int leader){
+      motorConfig.follow(leader);
+      motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
-  public double getAbsEncoderVelocityRotPMin() {
-    return absEncoder.getVelocity();
+  public void setTypeEncoder(FeedbackSensor encoder, boolean isAlternate) {
+    motorConfig.closedLoop.feedbackSensor(encoder);    
+    if(encoder == FeedbackSensor.kAlternateOrExternalEncoder){
+      AlternateEncoderConfig alternate = motorConfig.alternateEncoder
+      .countsPerRevolution(8196)
+      .inverted(isAlternate)
+      .positionConversionFactor(1)
+      ;
+      motorConfig.apply(alternate);
+                     
+      motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+      alternateEncoder = motor.getAlternateEncoder();
+    }
+    
+  }
+  
+  @Override
+  public int getID() {
+    return motor.getDeviceId();
   }
 }

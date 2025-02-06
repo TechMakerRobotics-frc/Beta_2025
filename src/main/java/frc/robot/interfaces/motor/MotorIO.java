@@ -1,14 +1,18 @@
 package frc.robot.interfaces.motor;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import org.littletonrobotics.junction.AutoLog;
+
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 public interface MotorIO {
   @AutoLog
   public static class MotorIOInputs {
     public double positionRot = 0.0;
+    public double positionAlternateEncoder = 0.0;
     public double velocityRadPerSec = 0.0;
     public double appliedVolts = 0.0;
     public double[] currentAmps = new double[] {};
@@ -54,6 +58,8 @@ public interface MotorIO {
     return inputs;
   }
 
+  public default void setFollower(int leader){}
+
   public default Queue<Double> getMotorQueue() {
     return new ArrayBlockingQueue<>(20);
   }
@@ -62,11 +68,9 @@ public interface MotorIO {
 
   public default void setBrakeMode(boolean set) {}
 
-  public default double getAbsEncoderPosition() {
-    return 0.0;
+  public default int getID() {
+    return 0;
   }
 
-  public default double getAbsEncoderVelocityRotPMin() {
-    return 0.0;
-  }
+  public default void setTypeEncoder(FeedbackSensor encoder, boolean isAlternate) {}
 }

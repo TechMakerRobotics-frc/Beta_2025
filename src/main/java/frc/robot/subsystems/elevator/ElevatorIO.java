@@ -14,6 +14,8 @@ public interface ElevatorIO {
     public double velocityRadPerSecRight = 0.0;
     public double appliedVoltsRight = 0.0;
     public double currentAmpsRight = 0.0;
+
+    public double positionAlternateEncoder = 0.0;
   }
 
   public default void updateInputs(ElevatorIOInputs inputs) {}
@@ -21,6 +23,8 @@ public interface ElevatorIO {
   public default void setVoltage(double volts) {}
 
   public default void setVelocity(double velocityRadPerSec) {}
+
+  public default void set(double power){}
 
   public default void stop() {}
 

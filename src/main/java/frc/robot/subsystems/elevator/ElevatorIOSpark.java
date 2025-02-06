@@ -1,6 +1,7 @@
 package frc.robot.subsystems.elevator;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.util.Units;
 import frc.robot.interfaces.motor.MotorIO;
@@ -26,14 +27,15 @@ public class ElevatorIOSpark implements ElevatorIO {
         new MotorIOSparkMax(
             ElevatorConstants.MOTOR_RIGHT_ID,
             MotorType.kBrushless,
-            true,
+            false,
             250,
             10.0,
             30,
             IdleMode.kBrake);
-
-    motorLeft.setOffset(motorLeft.getAbsEncoderPosition());
-    motorRight.setOffset(motorRight.getAbsEncoderPosition());
+    
+    motorLeft.setFollower(ElevatorConstants.MOTOR_RIGHT_ID);
+    motorRight.setTypeEncoder(FeedbackSensor.kAlternateOrExternalEncoder, true);
+    motorRight.setOffset(motorRight.getMotorIOInputs().positionAlternateEncoder);
   }
 
   @Override
@@ -48,29 +50,31 @@ public class ElevatorIOSpark implements ElevatorIO {
     inputs.currentAmpsRight = motorIOInputs.currentAmps[0];
     inputs.velocityRadPerSecRight = motorIOInputs.velocityRadPerSec;
     inputs.positionRadRight = Units.rotationsToRadians(motorIOInputs.positionRot);
+    inputs.positionAlternateEncoder = motorIOInputs.positionAlternateEncoder;
   }
 
   @Override
   public void setVoltage(double volts) {
-    motorLeft.setVoltage(volts);
     motorRight.setVoltage(volts);
   }
 
   @Override
   public void setVelocity(double velocityRadPerSec) {
-    motorLeft.setVelocity(velocityRadPerSec * ElevatorConstants.MOTOR_LEFT_GEAR_RATIO);
-    motorRight.setVelocity(velocityRadPerSec * ElevatorConstants.MOTOR_RIGHT_GEAR_RATIO);
+  
+    motorRight.setVelocity(velocityRadPerSec);
+  }
+  @Override
+  public void set(double power){
+    motorRight.set(power);
   }
 
   @Override
   public void stop() {
-    motorLeft.stop();
     motorRight.stop();
   }
 
   @Override
   public void runPosition(double position) {
-    motorLeft.setPosition(position);
     motorRight.setPosition(position);
   }
 }
