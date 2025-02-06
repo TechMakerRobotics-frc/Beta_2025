@@ -48,11 +48,15 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> cradle.runVelocity(-controller.getRightTriggerAxis() * 2)))
         .onFalse(new InstantCommand(() -> cradle.stop()));
 
-    controller.x().onTrue(new InstantCommand(() -> climber.runVelocity(2)))
-                  .onFalse(new InstantCommand(() -> climber.stop()));
+    controller
+        .x()
+        .onTrue(new InstantCommand(() -> climber.runVelocity(2)))
+        .onFalse(new InstantCommand(() -> climber.stop()));
 
-    controller.y().onTrue(new InstantCommand(() -> climber.runVelocity(-2)))
-                  .onFalse(new InstantCommand(() -> climber.stop()));
+    controller
+        .y()
+        .onTrue(new InstantCommand(() -> climber.runVelocity(-2)))
+        .onFalse(new InstantCommand(() -> climber.stop()));
   }
 
   public Command getAutonomousCommand() {
