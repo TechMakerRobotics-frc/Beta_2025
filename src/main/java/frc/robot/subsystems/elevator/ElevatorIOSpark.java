@@ -31,6 +31,9 @@ public class ElevatorIOSpark implements ElevatorIO {
             10.0,
             30,
             IdleMode.kBrake);
+
+    motorLeft.setOffset(motorLeft.getAbsEncoderPosition());
+    motorRight.setOffset(motorRight.getAbsEncoderPosition());
   }
 
   @Override
@@ -63,5 +66,11 @@ public class ElevatorIOSpark implements ElevatorIO {
   public void stop() {
     motorLeft.stop();
     motorRight.stop();
+  }
+
+  @Override
+  public void runPosition(double position) {
+    motorLeft.setPosition(position);
+    motorRight.setPosition(position);
   }
 }
